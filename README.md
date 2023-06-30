@@ -37,12 +37,52 @@ Received Message: Hello To Partioned Topic! from partition: 3
 
 ### BASIC:
 
+* Start docker-compose from the folder src/main/java/dev/rbruno/spring/kafka/
+* For offset explorer 2.3.1 point zookeeper on port 22181
 
-But with the introduction of AdminClient in Kafka, we can now create topics programmatically.
+With the introduction of AdminClient in Kafka, we can now create topics programmatically.  
 
-producer:
-producerFactory
-Then we need a KafkaTemplate, which wraps a Producer instance and provides convenience methods for sending messages to Kafka topics.
+
+## Key Points:
+### Producer
+* KafkaProducerConfig:
+* producerFactory(with all specific parameters)
+* KafkaTemplate(which simply wraps a producerFactory instance and provides convenience methods for sending messages to Kafka topics)
+
+Particular producers:
+* Json objects: Greeting => ProducerFactory<String, Greeting>
+  * StringSerializer and JsonSerializer(value)
+
+* Different Objects in the same topic => ProducerFactory<String, Object>
+  * multiTypeProducerFactory: configProps.put(JsonSerializer.TYPE_MAPPINGS
+  
+
+
+### Consumer
+* we need to configure a ConsumerFactory and a KafkaListenerContainerFactory
+* now it's possible to use @KafkaListener once we've declared also: @EnableKafka in the configuration class
+* Note that "listenToPartitionAndOffset" listen from  the designed offset, but consumes always the current inserted offset even if "designed offset" > "actual offset"
+
+Test consumers:  
+* listenWithHeaders
+* listenToPartition
+* listenToPartitionAndOffset
+* listenWithFilter
+* listenGroupFoo
+* listenGroupBar
+
+
+Particular consumers:  
+
+greetingKafkaListenerContainerFactory
+* Json objects: Greeting => ConsumerFactory<String, Greeting>
+    * StringDeserializer and JsonDeserializer(value)
+
+
+
+
+
+In KafkaApplication class we have the MessageProducer and the MessageConsumer
 Multi-Method Listeners
 
 
@@ -114,3 +154,8 @@ Monitoring Consumer Lag via Actuator Endpoint
 Configuring Metrics Using Micrometer
 
 reading  via scripts in nera real time
+
+#### References
+https://www.baeldung.com/spring-kafka  
+https://docs.spring.io/spring-kafka/api/org/springframework/kafka/support/KafkaHeaders.html
+https://logback.qos.ch/manual/configuration.html#autoScan
