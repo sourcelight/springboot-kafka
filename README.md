@@ -43,6 +43,10 @@ Received Message: Hello To Partioned Topic! from partition: 3
 With the introduction of AdminClient in Kafka, we can now create topics programmatically.  
 
 
+In KafkaApplication class we have the MessageProducer and the MessageConsumer  
+with multiple methods for the producers and the consumers(@KafkaListener)
+
+
 ## Key Points:
 ### Producer
 * KafkaProducerConfig:
@@ -64,12 +68,14 @@ Particular producers:
 * Note that "listenToPartitionAndOffset" listen from  the designed offset, but consumes always the current inserted offset even if "designed offset" > "actual offset"
 
 Test consumers:  
+* 2 consumers on the same topic
+  * listenGroupFoo
+  * listenGroupBar
 * listenWithHeaders
 * listenToPartition
 * listenToPartitionAndOffset
 * listenWithFilter
-* listenGroupFoo
-* listenGroupBar
+
 
 
 Particular consumers:  
@@ -78,12 +84,10 @@ greetingKafkaListenerContainerFactory
 * Json objects: Greeting => ConsumerFactory<String, Greeting>
     * StringDeserializer and JsonDeserializer(value)
 
+* MultiTypeKafkaListener on a whole class (not on the method )
+  * use of a Kafka @KafkaHandler for each type of object
+  * Note with the "isDefault" attribute to true you can manage everything and tune later
 
-
-
-
-In KafkaApplication class we have the MessageProducer and the MessageConsumer
-Multi-Method Listeners
 
 
 ### TESTING:

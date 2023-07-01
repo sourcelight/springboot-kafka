@@ -71,6 +71,7 @@ public class KafkaApplication {
 
         producer.sendMultiType(new Greeting("Greetings", "World!"));
         producer.sendMultiType(new Farewell("Farewell", 25));
+        producer.sendMultiType(new GreetingNotMapped("Hello", "Riccardo","Bruno"));
         producer.sendMultiType( "Simple string message");
         listener.multiTypeLatch.await(10, TimeUnit.SECONDS);
 
@@ -158,7 +159,7 @@ public class KafkaApplication {
 
         private CountDownLatch greetingLatch = new CountDownLatch(1);
 
-        private CountDownLatch multiTypeLatch = new CountDownLatch(3);
+        private CountDownLatch multiTypeLatch = new CountDownLatch(4);
 
         @KafkaListener(topics = "${message.topic.name}", groupId = "foo", containerFactory = "fooKafkaListenerContainerFactory")
         public void listenGroupFoo(String message) {
@@ -172,11 +173,6 @@ public class KafkaApplication {
             latch.countDown();
         }
 
-       /* @KafkaListener(topics = "${message.topic.name}", containerFactory = "headersKafkaListenerContainerFactory")
-        public void listenWithHeaders(@Payload String message, @Header(KafkaHeaders.RECEIVED_PARTITION) int partition) {
-            log.info("Received Headers Message: " + message + " from partition: " + partition );
-            latch.countDown();
-        }*/
 
 
         @KafkaListener(topics = "${message.topic.name}", containerFactory = "headersKafkaListenerContainerFactory")
@@ -210,11 +206,6 @@ public class KafkaApplication {
             this.greetingLatch.countDown();
         }
 
-        @KafkaListener(topics = "${multi.type.topic.name}", containerFactory = "multiTypeKafkaListenerContainerFactory")
-        public void multiTypeListener(Object obj) {
-            log.info("ReceivedMultiType  message: " + obj);
-            this.multiTypeLatch.countDown();
-        }
 
 
     }
