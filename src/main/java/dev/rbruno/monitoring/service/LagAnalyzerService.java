@@ -54,6 +54,14 @@ public class LagAnalyzerService {
         return lags;
     }
 
+    /**
+     * This method returns the current offset for each topic partition
+     * where a consumer with a specific group id is acting
+     * @param groupId
+     * @return
+     * @throws ExecutionException
+     * @throws InterruptedException
+     */
     public Map<TopicPartition, Long> getConsumerGrpOffsets(String groupId)
       throws ExecutionException, InterruptedException {
         ListConsumerGroupOffsetsResult info = adminClient.listConsumerGroupOffsets(groupId);
@@ -69,6 +77,12 @@ public class LagAnalyzerService {
         return groupOffset;
     }
 
+    /**
+     * This method returns the end offset for each topic partition
+     * where a consumer with a specific consumerGrpOffset is acting
+     * @param consumerGrpOffset
+     * @return
+     */
     private Map<TopicPartition, Long> getProducerOffsets(Map<TopicPartition, Long> consumerGrpOffset) {
         List<TopicPartition> topicPartitions = new LinkedList<>();
         for (Map.Entry<TopicPartition, Long> entry : consumerGrpOffset.entrySet()) {
@@ -78,6 +92,13 @@ public class LagAnalyzerService {
         return consumer.endOffsets(topicPartitions);
     }
 
+    /**
+     * This method returns the lag for each partition
+     * elaborated by a consumer group
+     * @param consumerGrpOffsets
+     * @param producerOffsets
+     * @return
+     */
     public Map<TopicPartition, Long> computeLags(
       Map<TopicPartition, Long> consumerGrpOffsets,
       Map<TopicPartition, Long> producerOffsets) {

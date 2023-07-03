@@ -143,13 +143,13 @@ Create a Rest application reading from the store
 Inside the "embedded" folder  
 Let' create a simple producer-consumer application
 
-#### Testing Using Embedded Kafka*(In memory Kafka Broker), no need to run docker
+#### Testing Using Embedded Kafka(In memory Kafka Broker), no need to run docker
 * We use an in-memory Kafka instance to run our tests against
 * Our dependency contains the EmbeddedKafkaBroker class
 * @EmbeddedKafka(partitions = 1, brokerProperties = { "listeners=PLAINTEXT://localhost:9092", "port=9092" })
 * the above annotation:  inject an instance of an EmbeddedKafkaBroker into our tests.
 
-#### Test Containers *(It requires Docker installed and running)
+#### Test Containers (It requires Docker installed and running)
 * Small differences between a real external service vs an embedded in-memory
 * We'll instance a Kafka Broker inside a Docker Container
 * "@ClassRule" manages the whole lifecycle container
@@ -174,7 +174,14 @@ Finally, we covered some approaches for effectively testing and verifying our to
 
 
 ### CONSUMER LAG:
-Consumer lag is simply the delta between the consumer's last committed offset and the producer's end offset in the log(topic)
+Kafka consumer group lag is a key performance indicator of any Kafka-based event-driven system  
+Consumer lag is simply the delta between the consumer's last committed offset and the producer's end offset in the log(topic)  
+We'll build an analyzer application to monitor Kafka consumer lag.  
+To inspect the offset values of a consumer group, we'll need the administrative Kafka client  
+*We compute the differences offset (producer vs consumer group id) for each topic partition*  
+
+
+
 
 Simulator
 
