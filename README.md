@@ -66,6 +66,9 @@ Particular producers:
 * we need to configure a ConsumerFactory and a KafkaListenerContainerFactory
 * now it's possible to use @KafkaListener once we've declared also: @EnableKafka in the configuration class
 * Note that "listenToPartitionAndOffset" listen from  the designed offset, but consumes always the current inserted offset even if "designed offset" > "actual offset"
+* Note the use of "ConcurrentKafkaListenerContainerFactory", it's thread-safe and manages multiple threads(setConcurrency(num threads < partition number))
+* While the "KafkaMessageListenerContainer" manages only one thread for all partitions and multiple topics
+
 
 Test consumers:  
 * 2 consumers on the same topic
@@ -88,6 +91,11 @@ greetingKafkaListenerContainerFactory
   * use of a Kafka @KafkaHandler for each type of object
   * Note with the "isDefault" attribute to true you can manage everything and tune later
 
+Important Note: If ack=all & min.insync.replicas = Number of partitions  
+In case one broker is down => The producer get stuck waiting for the "min.insync.replicas" never reached  
+Conclusion => better having "min.insync.replicas" < num.brokers  
+"acks" is a client producer configuration  
+"min.insync.replicas" is a config on the broker  
 
 
 ### TESTING:
@@ -131,7 +139,24 @@ Save the output to a kafka store
 Create a Rest application reading from the store
 
 
-TESTING:
+### TESTING
+Inside the "embedded" folder  
+Let' create a simple producer-consumer application
+
+#### Testing Using Embedded Kafka*(In memory Kafka Broker), no need to run docker
+* We use an in-memory Kafka instance to run our tests against
+* Our dependency contains the EmbeddedKafkaBroker class
+* @EmbeddedKafka(partitions = 1, brokerProperties = { "listeners=PLAINTEXT://localhost:9092", "port=9092" })
+* the above annotation:  inject an instance of an EmbeddedKafkaBroker into our tests.
+
+#### Test Containers *(It requires Docker installed and running)
+* Small differences between a real external service vs an embedded in-memory
+* We'll instance a Kafka Broker inside a Docker Container
+* "@ClassRule" manages the whole lifecycle container
+* With "KafkaTestContainersConfiguration" we manage the dynamic configuration created by the "kafkatestcontainer"  
+that prevents port clashes.
+
+
 
 	UNIT TEST
 		TopologyTestDriver => to test kafka streams
@@ -157,9 +182,16 @@ Monitoring Consumer Lag via Actuator Endpoint
 
 Configuring Metrics Using Micrometer
 
-reading  via scripts in nera real time
+reading  via scripts in near real time
 
 #### References
-https://www.baeldung.com/spring-kafka  
-https://docs.spring.io/spring-kafka/api/org/springframework/kafka/support/KafkaHeaders.html
-https://logback.qos.ch/manual/configuration.html#autoScan
+Basic: https://www.baeldung.com/spring-kafka  
+Kafka Headers: https://docs.spring.io/spring-kafka/api/org/springframework/kafka/support/KafkaHeaders.html  
+LogBack: https://logback.qos.ch/manual/configuration.html#autoScan  
+InSync: https://accu.org/journals/overload/28/159/kozlovski/  
+Filtering maven dependencies: https://maven.apache.org/plugins/maven-dependency-plugin/examples/filtering-the-dependency-tree.html    
+* mvn dependency:tree [groupId]:[artifactId]:[type]:[version]  
+* Example: mvn dependency:tree -Dincludes=junit:junit:jar:4.13.2  
+*Junit Testcontainers*
+* Junit Testcontainers integrations: https://java.testcontainers.org/test_framework_integration/junit_4/
+* Jupieter/Junit 5: https://java.testcontainers.org/test_framework_integration/junit_5/ 
