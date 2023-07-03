@@ -178,7 +178,7 @@ Kafka consumer group lag is a key performance indicator of any Kafka-based event
 Consumer lag is simply the delta between the consumer's last committed offset and the producer's end offset in the log(topic)  
 We'll build an analyzer application to monitor Kafka consumer lag.  
 To inspect the offset values of a consumer group, we'll need the administrative Kafka client  
-*We compute the differences offset (producer vs consumer group id) for each topic partition*  
+**compute the difference offsets (producer vs consumer group id) for each topic partition**  
 
 
 
