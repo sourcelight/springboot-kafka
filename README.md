@@ -132,14 +132,45 @@ It enables us to do operations like joins, grouping, aggregation, and filtering 
 The processor topology can be considered as a DIRECTED ACYCLIC GRAPH. In this graph, nodes are categorized into SOURCE, PROCESSOR, and SINK nodes.
 Alongside the core processing, the state of the stream is saved periodically using checkpoints for fault tolerance and resilience.
 
-Create a topology processor
-**Notice the analogy**:
-* "KafkaTemplate" for the producer and "KStream" for Kafka Streams to create the input stream 
-* "KTable" to create the output stream.
 
-Save the output to a kafka store
+**Steps**
+* Here, we've used th e@EnableKafkaStreams annotation to autoconfigure the required components
+* We create an "KafkaStreamsConfiguration" Bean 
+* Spring Boot uses the above configuration and creates a KafkaStreams client to manage our application lifecycle
+* We build the Topology processor to keep a count of the words from input messages
+* **Notice the analogy**:
+  * "KafkaTemplate" for the producer and "KStream" for Kafka Streams to create the input stream 
+  * "KTable" to create the output stream.
+* We've used the high-level DSL to define the transformations
+  * Create a KStream from the input topic using the specified key and value SerDes.
+  * Create a KTable by transforming, splitting, grouping, and then counting the data.
+  * Materialize the result to an output stream.
 
-Create a Rest application reading from the store
+Save the output to a kafka topic and in a kafka store(Materialized.as("counts")) 
+
+We Create a Rest application (WordCountRestService)
+* We read the data from the kafka store via Rest API
+* We insert the data into the kafkaProducer via Rest API
+
+
+### Test KafkaStreams
+
+#### Junit test with WordCountProcessorUnitTest
+It leverages on the "TopologyTestDriver"  
+and**eliminates the need to have a broker running and still verify the pipeline behavior**  
+
+* test: try to remove the transforming(lowercase) and put a capital letter in the input data
+
+
+
+
+#### Integration test with KafkaStreamsApplicationLiveTest
+We use a TestContainer to make and end-to-end test  
+* We make post messages on the API(using dynamic port)
+* We test the results directly on the topic(by a blocking queue)
+* We test the results by the Rest API
+
+
 
 
 ### TESTING
@@ -254,5 +285,7 @@ Filtering maven dependencies: https://maven.apache.org/plugins/maven-dependency-
 * mvn dependency:tree [groupId]:[artifactId]:[type]:[version]  
 * Example: mvn dependency:tree -Dincludes=junit:junit:jar:4.13.2  
 *Junit Testcontainers*
-* Junit Testcontainers integrations: https://java.testcontainers.org/test_framework_integration/junit_4/
-* Jupieter/Junit 5: https://java.testcontainers.org/test_framework_integration/junit_5/ 
+  * Junit Testcontainers integrations: https://java.testcontainers.org/test_framework_integration/junit_4/
+  * Jupieter/Junit 5: https://java.testcontainers.org/test_framework_integration/junit_5/ 
+* Blocking queue: https://www.youtube.com/watch?v=d3xb1Nj88pw
+* àk,

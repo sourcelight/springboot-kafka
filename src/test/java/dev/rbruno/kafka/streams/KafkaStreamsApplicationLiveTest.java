@@ -73,7 +73,7 @@ class KafkaStreamsApplicationLiveTest {
         startOutputTopicConsumer();
 
         // assert correct counts from output topic
-        assertThat(output.poll(2, MINUTES)).isEqualTo("test:1");
+        assertThat(output.poll(2, MINUTES)).isEqualTo("test:1");// values inserted at 130 line: output.add(record.key() + ":" + record.value())
         assertThat(output.poll(2, MINUTES)).isEqualTo("message:1");
 
         // assert correct count from REST service
