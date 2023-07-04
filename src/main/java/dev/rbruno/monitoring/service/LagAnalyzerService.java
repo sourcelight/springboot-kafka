@@ -22,6 +22,15 @@ import java.util.concurrent.ExecutionException;
 @Service
 public class LagAnalyzerService {
 
+
+    private Long lag;
+    public Long getLag() {
+        return lag;
+    }
+
+
+
+
     private static final Logger LOGGER = LoggerFactory.getLogger(LagAnalyzerService.class);
 
     private final AdminClient adminClient;
@@ -33,6 +42,13 @@ public class LagAnalyzerService {
         consumer = getKafkaConsumer(bootstrapServerConfig);
     }
 
+    /**
+     * this method returns the lagd for each partition of a specific consumer-group
+     * @param groupId
+     * @return
+     * @throws ExecutionException
+     * @throws InterruptedException
+     */
     public Map<TopicPartition, Long> analyzeLag(String groupId)
       throws ExecutionException, InterruptedException {
         Map<TopicPartition, Long> consumerGrpOffsets = getConsumerGrpOffsets(groupId);
@@ -43,13 +59,12 @@ public class LagAnalyzerService {
               .topic();
             int partition = lagEntry.getKey()
               .partition();
-            Long lag = lagEntry.getValue();
+            this.lag = lagEntry.getValue();
             LOGGER.info("Time={} | Lag for topic = {}, partition = {}, groupId = {} is {}",
               MonitoringUtil.time(),
               topic,
               partition,
-              groupId,
-              lag);
+              groupId, this.lag);
         }
         return lags;
     }

@@ -173,23 +173,74 @@ Then, we saw how to integrate this with the REST functionality provided by Sprin
 Finally, we covered some approaches for effectively testing and verifying our topology and application behavior.
 
 
-### CONSUMER LAG:
+### Monitoring the CONSUMER LAG:
 Kafka consumer group lag is a key performance indicator of any Kafka-based event-driven system  
 Consumer lag is simply the delta between the consumer's last committed offset and the producer's end offset in the log(topic)  
-We'll build an analyzer application to monitor Kafka consumer lag.  
-To inspect the offset values of a consumer group, we'll need the administrative Kafka client  
-**compute the difference offsets (producer vs consumer group id) for each topic partition**  
+* We'll build an analyzer application to monitor Kafka consumer lag.  
+* To inspect the offset values of a consumer group, we'll need the administrative Kafka client  
+**Compute the difference offsets (producer vs consumer group id) for each topic partition**  
+* We created a getConsumerGrpOffsets
+* We created a getProducerOffsets  
+**We need to automate everything**
+* We created a LagAnalyzerService with a @Scheudled annotation
+**Test Class**
+* We use an embedded kafka broker(not a test container)
+* We create a producer, a consumer, and we start to consume(poll every second)
+* Three test cases
+  * AllProducedMessagesAreConsumed_thenLagBecomesZero
+  * MessageNotConsumed_thenLagIsEqualToProducedMessage
+  * MessageConsumedLessThanProduced_thenLagIsNonZero
+
+* Note producer produces a batch of 100 messages at time
+* Note we consume at a rate of 1 sec(sleep) and default max.poll.records is 500 
+  * For other considerations take into account also "max.partition.fetch.bytes, which is 1MB by default."
+
+* Additional: check on the AllProducedMessagesAreConsumed_thenLagBecomesZero test:   
+  about poll on the consumer: props.setProperty(ConsumerConfig.MAX_POLL_RECORDS_CONFIG,"1000");
+
+#### Simulator
+* Prerequisites; set properties "monitor.producer.simulate", etc to true
+* Classes inside "simulation" package
+* Notes:
+  * run docker compose 
+  * The topic is crated by AdminClient in other classes
+  * logback from DEBUG -> INFO
+  * run LagAnalyzerApplication as SpringBoot application (checks every 5 secs)
+
+**We produce at 1ms(for 30 secs) and consume at 10ms rate**
+  * the lag increases and decreases to zero
+
+So, lag will start building for the first 30 seconds, after which the producer stops producing, so lag will gradually decline to 0.
 
 
+#### Monitoring Consumer Lag via Actuator Endpoint
+
+* We set the dependencies for the actuator, prometheus and micrometer
+* We enable in application properties the /actuator
+* Enable JMX and create an instance of MeterRegistry
+* Add the MeterRegistry instance to the ConsumerFactory
+
+Reading  via scripts in near real time using property exposed by micrometer-prometheus
+<pre>
+while true
+do
+curl --silent -XGET http://localhost:8081/actuator/prometheus | \
+awk '/kafka_consumer_fetch_manager_records_lag{/{print "Current lag is:",$2}';
+sleep 5;
+done
+</pre>
+
+Reading  via scripts in near real time using property exposed by custom EP with the Actuator
+<pre>
+while true
+do
+curl --silent -XGET http://localhost:8081/actuator/get-lag-consumer | \
+awk '{print "Current lag is:",$1}';
+sleep 2;
+done
+</pre>
 
 
-Simulator
-
-Monitoring Consumer Lag via Actuator Endpoint
-
-Configuring Metrics Using Micrometer
-
-reading  via scripts in near real time
 
 #### References
 Basic: https://www.baeldung.com/spring-kafka  

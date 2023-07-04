@@ -21,7 +21,7 @@ public class LiveLagAnalyzerService {
         this.groupId = groupId;
     }
 
-    @Scheduled(fixedDelay = 5000L)
+    @Scheduled(fixedDelay = 3000L)
     public void liveLagAnalysis() throws ExecutionException, InterruptedException {
         lagAnalyzerService.analyzeLag(groupId);
     }

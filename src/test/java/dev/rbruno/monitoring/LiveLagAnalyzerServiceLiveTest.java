@@ -158,6 +158,8 @@ public class LiveLagAnalyzerServiceLiveTest {
         props.setProperty(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class.getName());
         props.setProperty(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class.getName());
         props.setProperty(ConsumerConfig.GROUP_ID_CONFIG, GROUP_ID);
+        //highlight this property using the test and increase the BATCH_SIZE
+        //props.setProperty(ConsumerConfig.MAX_POLL_RECORDS_CONFIG,"1000");
         consumer = new KafkaConsumer<>(props);
         consumer.assign(Arrays.asList(TOPIC_PARTITION));
         consumer.poll(Duration.ofMillis(1L));
