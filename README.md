@@ -120,19 +120,22 @@ Reasons: small differences between a real external service vs an embedded in-mem
 
 
 
-### KAFA STREAMS:
+### KAFKA STREAMS:
+
 Kafka Streams is a client-side library built on top of Apache Kafka
 It enables the processing of an unbounded stream of events in a declarative manner.
-Some real-life examples of streaming data could be sensor data, stock market event streams, and system logs
-We'll build a simple word-count streaming application.
-Kafka Streams provides a duality between Kafka topics and relational database tables.
-It enables us to do operations like joins, grouping, aggregation, and filtering of one or more streaming events.
-PROCESSOR TOPOLOGY is the BLUEPRINT of Kafka Stream operations on one or more event streams.
+Some real-life examples of streaming data could be sensor data, stock market event streams, and system logs  
+We'll build a simple word-count streaming application.  
+**Kafka Streams provides a duality between Kafka topics and relational database tables.**  
+It enables us to do operations like joins, grouping, aggregation, and filtering of one or more streaming events.  
+**PROCESSOR TOPOLOGY** is the BLUEPRINT of Kafka Stream operations on one or more event streams.
 The processor topology can be considered as a DIRECTED ACYCLIC GRAPH. In this graph, nodes are categorized into SOURCE, PROCESSOR, and SINK nodes.
 Alongside the core processing, the state of the stream is saved periodically using checkpoints for fault tolerance and resilience.
 
-Create a topolgy processor
-Notice "KafkaTemplate" for the producer and "KStream" for Kafka Streams to create the input stream and "KTable" to reate the output stream.
+Create a topology processor
+**Notice the analogy**:
+* "KafkaTemplate" for the producer and "KStream" for Kafka Streams to create the input stream 
+* "KTable" to create the output stream.
 
 Save the output to a kafka store
 
