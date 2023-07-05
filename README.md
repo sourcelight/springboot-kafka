@@ -221,6 +221,75 @@ done
 </pre>
 
 
+## Connector
+Kafka Connect is a framework for connecting Kafka with external systems such as databases, key-value stores, search indexes, and file systems, using so-called Connectors.  
+**Kafka Connectors are ready-to-use components, which can help us to import data from external systems into Kafka topics and export data from Kafka topics into external systems.**  
+We can find connectors for most popular systems, like S3, JDBC, MySQL, etc.  
+To make this trial we'll use the Confluent Platform using docker.
+
+Basic example using the Confluent Platform  
+* File Source connector and the File Sink connector
+* Finally, we have to configure the Connect worker, which will integrate our two connectors and do the work  
+  of reading from the source connector and writing to the sink connector: WORKER CONFIG  
+
+Below are the procedural steps to execute inside the Linux container(started from docker-compose from confluent platform that includes the files configurations and the necessary jar's connectors to work)  
+<pre>
+#run the docker-compose from the folder:spring.kafka
+
+#update the Linux software repository
+yum update
+
+#install a program, e.g.: find: findutils
+yum install findutils
+
+#connect to the container as root
+docker exec -u 0 -it kafka-kafka-1 bash
+
+#add to the plugin.path the path(comma separated): "/usr/share/filestream-connectors"
+#note in vim: i=>insert, to esc from insert mode => CTRL+C, to save :wq!
+vim /etc/kafka/connect-standalone.properties
+
+#add the file to be read in the /tmp/ folder
+echo -e "cat\ndog\nhorse\n" > /tmp/test.txt
+#let's configure the 2 connectors source and sink with the references files(source and sink)
+
+vim /etc/kafka/connect-file-source.properties =>file:/tmp/test.txt
+vim /etc/kafka/connect-file-sink.properties  =>file:/tmp/test.sink.txt
+
+#Now we launch our connector
+/usr/bin/connect-standalone /etc/kafka/connect-standalone.properties /etc/kafka/connect-file-source.properties /etc/kafka/connect-file-sink.properties
+
+#we should see the data transferred in the test.sink.txt file
+vim /tmp/test.sink.txt
+
+#to list the topics crated after the launch of the connector
+/usr/bin/kafka-topics --list --bootstrap-server localhost:9092
+
+
+#We can add data in the test.txt file and see the tranfer and look to the "connector console"
+echo -e "zebra\nbird\nwolf\n" >> /tmp/test.txt
+
+#and check again the destination file of the connector
+vim /tmp/test.sink.txt
+
+#read the data from the topic by a consumer from the beginning(a normal single consumer starts from that point on)
+/usr/bin/kafka-console-consumer --bootstrap-server localhost:9092 --topic connect-test --from-beginning
+
+#send data(if we insert data just in the topic, data are no transferred in the output file)
+/usr/bin/kafka-console-producer --bootstrap-server localhost:9092 --topic connect-test
+
+#delete a topics
+/usr/bin/kafka-topics --bootstrap-server localhost:9092 --delete --topic connect-test
+
+
+Notes
+ #copy a file from a container to a host
+ docker cp <containerId>:/file/path/within/container /host/path/target
+ #example:
+ docker cp broker:/usr/share/filestream-connectors/connect-file-7.3.1-ce.jar  ./
+</pre>
+
+
 
 ### Conclusions:
 In this example, we've seen how to create a simple event-driven application to process messages with Kafka Streams and Spring Boot.  
@@ -231,10 +300,11 @@ Finally, we covered some approaches for effectively testing and verifying our to
 
 
 #### References
-Basic: https://www.baeldung.com/spring-kafka  
-Kafka Headers: https://docs.spring.io/spring-kafka/api/org/springframework/kafka/support/KafkaHeaders.html  
-LogBack: https://logback.qos.ch/manual/configuration.html#autoScan  
-InSync: https://accu.org/journals/overload/28/159/kozlovski/  
+
+ 
+
+* InSync: https://accu.org/journals/overload/28/159/kozlovski/  
+* LogBack: https://logback.qos.ch/manual/configuration.html#autoScan  
 Filtering maven dependencies: https://maven.apache.org/plugins/maven-dependency-plugin/examples/filtering-the-dependency-tree.html    
 * mvn dependency:tree [groupId]:[artifactId]:[type]:[version]  
 * Example: mvn dependency:tree -Dincludes=junit:junit:jar:4.13.2  
@@ -242,4 +312,6 @@ Filtering maven dependencies: https://maven.apache.org/plugins/maven-dependency-
   * Junit Testcontainers integrations: https://java.testcontainers.org/test_framework_integration/junit_4/
   * Jupieter/Junit 5: https://java.testcontainers.org/test_framework_integration/junit_5/ 
 * Blocking queue: https://www.youtube.com/watch?v=d3xb1Nj88pw
-* àk,
+* Kafka References: https://www.javatpoint.com/apache-kafka
+* Basic: https://www.baeldung.com/spring-kafka  
+* Kafka Headers: https://docs.spring.io/spring-kafka/api/org/springframework/kafka/support/KafkaHeaders.html 
