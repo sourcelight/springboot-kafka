@@ -19,16 +19,16 @@ import org.springframework.stereotype.Service;
 import java.util.*;
 import java.util.concurrent.ExecutionException;
 
+
 @Service
 public class LagAnalyzerService {
 
 
     private Long lag;
+
     public Long getLag() {
         return lag;
     }
-
-
 
 
     private static final Logger LOGGER = LoggerFactory.getLogger(LagAnalyzerService.class);
@@ -44,27 +44,28 @@ public class LagAnalyzerService {
 
     /**
      * this method returns the lagd for each partition of a specific consumer-group
+     *
      * @param groupId
      * @return
      * @throws ExecutionException
      * @throws InterruptedException
      */
     public Map<TopicPartition, Long> analyzeLag(String groupId)
-      throws ExecutionException, InterruptedException {
+            throws ExecutionException, InterruptedException {
         Map<TopicPartition, Long> consumerGrpOffsets = getConsumerGrpOffsets(groupId);
         Map<TopicPartition, Long> producerOffsets = getProducerOffsets(consumerGrpOffsets);
         Map<TopicPartition, Long> lags = computeLags(consumerGrpOffsets, producerOffsets);
         for (Map.Entry<TopicPartition, Long> lagEntry : lags.entrySet()) {
             String topic = lagEntry.getKey()
-              .topic();
+                    .topic();
             int partition = lagEntry.getKey()
-              .partition();
+                    .partition();
             this.lag = lagEntry.getValue();
             LOGGER.info("Time={} | Lag for topic = {}, partition = {}, groupId = {} is {}",
-              MonitoringUtil.time(),
-              topic,
-              partition,
-              groupId, this.lag);
+                    MonitoringUtil.time(),
+                    topic,
+                    partition,
+                    groupId, this.lag);
         }
         return lags;
     }
@@ -72,17 +73,18 @@ public class LagAnalyzerService {
     /**
      * This method returns the current offset for each topic partition
      * where a consumer with a specific group id is acting
+     *
      * @param groupId
      * @return
      * @throws ExecutionException
      * @throws InterruptedException
      */
     public Map<TopicPartition, Long> getConsumerGrpOffsets(String groupId)
-      throws ExecutionException, InterruptedException {
+            throws ExecutionException, InterruptedException {
         ListConsumerGroupOffsetsResult info = adminClient.listConsumerGroupOffsets(groupId);
         Map<TopicPartition, OffsetAndMetadata> metadataMap = info
-          .partitionsToOffsetAndMetadata()
-          .get();
+                .partitionsToOffsetAndMetadata()
+                .get();
         Map<TopicPartition, Long> groupOffset = new HashMap<>();
         for (Map.Entry<TopicPartition, OffsetAndMetadata> entry : metadataMap.entrySet()) {
             TopicPartition key = entry.getKey();
@@ -95,6 +97,7 @@ public class LagAnalyzerService {
     /**
      * This method returns the end offset for each topic partition
      * where a consumer with a specific consumerGrpOffset is acting
+     *
      * @param consumerGrpOffset
      * @return
      */
@@ -110,14 +113,15 @@ public class LagAnalyzerService {
     /**
      * This method returns the lag for each partition
      * elaborated by a consumer group
+     *
      * @param consumerGrpOffsets
      * @param producerOffsets
      * @return
      */
     public Map<TopicPartition, Long> computeLags(
-      Map<TopicPartition, Long> consumerGrpOffsets,
-      Map<TopicPartition, Long> producerOffsets) {
-      Map<TopicPartition, Long> lags = new HashMap<>();
+            Map<TopicPartition, Long> consumerGrpOffsets,
+            Map<TopicPartition, Long> producerOffsets) {
+        Map<TopicPartition, Long> lags = new HashMap<>();
         for (Map.Entry<TopicPartition, Long> entry : consumerGrpOffsets.entrySet()) {
             Long producerOffset = producerOffsets.get(entry.getKey());
             Long consumerOffset = consumerGrpOffsets.get(entry.getKey());
@@ -130,23 +134,23 @@ public class LagAnalyzerService {
     private AdminClient getAdminClient(String bootstrapServerConfig) {
         Properties config = new Properties();
         config.put(
-          AdminClientConfig.BOOTSTRAP_SERVERS_CONFIG,
-          bootstrapServerConfig);
+                AdminClientConfig.BOOTSTRAP_SERVERS_CONFIG,
+                bootstrapServerConfig);
         return AdminClient.create(config);
     }
 
     private KafkaConsumer<String, String> getKafkaConsumer(
-      String bootstrapServerConfig) {
+            String bootstrapServerConfig) {
         Properties properties = new Properties();
         properties.setProperty(
-          ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG,
-          bootstrapServerConfig);
+                ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG,
+                bootstrapServerConfig);
         properties.setProperty(
-          ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG,
-          StringDeserializer.class.getName());
+                ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG,
+                StringDeserializer.class.getName());
         properties.setProperty(
-          ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG,
-          StringDeserializer.class.getName());
+                ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG,
+                StringDeserializer.class.getName());
         return new KafkaConsumer<>(properties);
     }
 }

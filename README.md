@@ -91,7 +91,7 @@ Alongside the core processing, the state of the stream is saved periodically usi
 
 
 **Steps**
-* Here, we've used th e@EnableKafkaStreams annotation to autoconfigure the required components
+* Here, we've used the @EnableKafkaStreams annotation to autoconfigure the required components
 * We create an "KafkaStreamsConfiguration" Bean 
 * Spring Boot uses the above configuration and creates a KafkaStreams client to manage our application lifecycle
 * We build the Topology processor to keep a count of the words from input messages
@@ -232,7 +232,8 @@ Basic example using the Confluent Platform
 * Finally, we have to configure the Connect worker, which will integrate our two connectors and do the work  
   of reading from the source connector and writing to the sink connector: WORKER CONFIG  
 
-Below are the procedural steps to execute inside the Linux container(started from docker-compose from confluent platform that includes the files configurations and the necessary jar's connectors to work)  
+Below are the procedural steps to execute inside the Linux container(started from docker-compose from confluent platform that includes the files configurations and the necessary jar's connectors to work)
+
 <pre>
 #run the docker-compose from the folder:spring.kafka
 
@@ -286,7 +287,7 @@ Notes
  #copy a file from a container to a host
  docker cp <containerId>:/file/path/within/container /host/path/target
  #example:
- docker cp broker:/usr/share/filestream-connectors/connect-file-7.3.1-ce.jar  ./
+ docker cp broker:/usr/share/filestream-connectors/connect-file-7.3.1-ce.jar  
 </pre>
 
 
